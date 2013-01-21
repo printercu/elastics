@@ -2,14 +2,14 @@ http  = require 'http'
 url   = require 'url'
 querystring = require 'querystring'
 
-class ES
+class Elastics
   constructor: (@defaults = {}) ->
-    @defaults.host = params.host || 'localhost'
-    @defaults.port = params.port || 9200
+    @defaults.host ||= 'localhost'
+    @defaults.port ||= 9200
 
-  setIndex: (index, type = null) ->
-    @defaults.index = index
-    @defaults.type  = type
+  setIndex: (index, type) ->
+    @defaults.index = index || null
+    @defaults.type  = type  || null
     @
 
   setType: (type) ->
@@ -17,39 +17,23 @@ class ES
     @
 
   generatePath: (params) ->
-    res = ''
-    index = params.index || @defaults.index
-    type  = params.type || @defaults.index
-    if @_index
-      res += '/' + @_index
-      res += '/' + @_type if @_type
-    res += '/' + path if path
-    res += '?' + querystring.stringify query if query
-    res
-
-  fixArgs: (path, data, query, callback) ->
-    if 'function' == typeof path
-      callback  = path
-      path      = data = query = null
-    else if path && 'object' == typeof path
-      callback  = query
-      query     = data
-      data      = path
-      path      = null
-    if 'function' == typeof data
-      callback  = data
-      data      = query = null
-    else if 'function' == typeof query
-      callback  = query
-      query     = null
-    [path, data, query, callback]
+    str = ''
+    index = params.index  || @defaults.index
+    type  = params.type   || @defaults.type
+    if index
+      str += '/' + index
+      str += '/' + type if type
+    path = params.id || params.path
+    str += '/' + path if path
+    str += '?' + querystring.stringify params.query if params.query
+    str
 
   request: (params, callback) ->
     req = http.request
-      host:     params.host || @
-      port:     @_port
-      method:   method
-      path:     @generatePath path, query
+      host:     params.host   || @defaults.host
+      port:     params.port   || @defaults.port
+      method:   params.method || 'GET'
+      path:     @generatePath params
       headers:  'Content-Type': 'application/json'
       (res) ->
         res_data = ''
@@ -67,51 +51,31 @@ class ES
           callback && callback null, obj
     .on 'error', (err) ->
       callback && callback err
-    if data
-      req.write JSON.stringify data
+    if params.data
+      req.write JSON.stringify params.data
     req.end()
 
-  _request_without_body: (method, path, query, callback) ->
-    if 'function' == typeof path
-      callback = path
-      path = query = null
-    else if 'object' == typeof path
-      callback = query
-      query = path
-      path = null
-    else if 'function' == typeof query
-      callback = query
-      query = null
-    @request method, path, null, query, callback
-
-  # restful methods
-  post: (path, data, query, callback) ->
-    @request 'POST', path, data, query, callback
-
-  get: (path, query, callback) ->
-    @_request_without_body 'GET', path, query, callback
-
-  put: (path, data, query, callback) ->
-    @request 'PUT', path, data, query, callback
-
-  delete: (path, query, callback) ->
-    @_request_without_body 'DELETE', path, query, callback
-
   # shortcuts
-  putMapping: (data, query, callback) ->
-    @put '_mapping', data, query, callback
+  putMapping: (params, callback) ->
+    params.path = '_mapping'
+    @put params, callback
 
-  deleteMapping: (query, callback) ->
-    @delete '_mapping', query, callback
+  search: (params, callback) ->
+    params.path = '_search'
+    @post params, callback
 
-  search: (data, query, callback) ->
-    @post '_search', data, query, callback
-
-  index: (id, data, query, callback) ->
-    if id && 'object' != typeof id
-      @put id, data, query, callback
+  index: (params, callback) ->
+    if params.id
+      @put params, callback
     else
-      @post id, data, query, callback
+      @post params, callback
 
-module.exports = ES
+for method in ['GET', 'PUT', 'POST', 'DELETE']
+  ((method)->
+    Elastics.prototype[method.toLowerCase()] = (params, callback) ->
+      params.method = method
+      @request params, callback
+  )(method)
+
+module.exports = Elastics
 

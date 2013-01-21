@@ -1,9 +1,7 @@
 {
   "name": "elastics",
   "version": "0.1.0",
-  "author": {
-    "name": "Maxim Melentiev"
-  },
+  "author": "Max Melentiev",
   "main": "index.coffee",
   "scripts": {
     "test": "mocha"
@@ -14,5 +12,19 @@
   "devDependencies": {
     "mocha": "*",
     "flow": "*"
-  }
+  },
+  "readmeFilename": "README.md",
+  "description": "Simple & handy client for elasticsearch",
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/printercu/elastics.git"
+  },
+  "keywords": [
+    "elasticsearch",
+    "fulltext"
+  ],
+  "license": "BSD"
 }
