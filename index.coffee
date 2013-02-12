@@ -20,11 +20,11 @@ class Elastics
     str = ''
     index = params.index  || @defaults.index
     type  = params.type   || @defaults.type
-    if index
+    if index?
       str += '/' + index
-      str += '/' + type if type
-    path = params.id || params.path
-    str += '/' + path if path
+      str += '/' + type if type?
+    path = if params.id? then params.id else params.path
+    str += '/' + path if path?
     str += '?' + querystring.stringify params.query if params.query
     str
 
