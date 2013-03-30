@@ -40,17 +40,17 @@ class Elastics
         res.on 'data', (chunk) ->
           res_data += chunk
         res.on 'error', (err) ->
-          callback && callback err
+          callback? err
         res.on 'end', ->
           unless 300 > @statusCode
-            return callback && callback new Error res_data
+            return callback? new Error res_data
           try
             obj = JSON.parse res_data
           catch err
-            return callback && callback err
-          callback && callback null, obj
+            return callback? err
+          callback? null, obj
     .on 'error', (err) ->
-      callback && callback err
+      callback? err
     if params.data
       req.write JSON.stringify params.data
     req.end()
