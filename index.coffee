@@ -1,8 +1,8 @@
 http  = require 'http'
 url   = require 'url'
-querystring = require 'querystring'
+qs    = require 'querystring'
 
-class Elastics
+module.exports = class Elastics
   constructor: (@defaults = {}) ->
     @defaults.host ||= 'localhost'
     @defaults.port ||= 9200
@@ -25,7 +25,7 @@ class Elastics
       str += '/' + type if type?
     path = if params.id? then params.id else params.path
     str += '/' + path if path?
-    str += '?' + querystring.stringify params.query if params.query
+    str += '?' + qs.stringify params.query if params.query
     str
 
   request: (params, callback) ->
@@ -70,12 +70,8 @@ class Elastics
     else
       @post params, callback
 
-for method in ['GET', 'PUT', 'POST', 'DELETE']
-  ((method)->
-    Elastics.prototype[method.toLowerCase()] = (params, callback) ->
-      params.method = method
-      @request params, callback
-  )(method)
-
-module.exports = Elastics
-
+  for method in ['GET', 'PUT', 'POST', 'DELETE']
+    do (method) =>
+      @prototype[method.toLowerCase()] = (params, callback) ->
+        params.method = method
+        @request params, callback
