@@ -1,5 +1,5 @@
 assert  = require 'assert'
-flow    = require 'flow'
+flow    = require 'flow-coffee'
 Es      = require '../'
 
 TEST_INDEX  = 'test_index'
