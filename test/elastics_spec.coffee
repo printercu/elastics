@@ -11,9 +11,9 @@ describe 'Elastics', ->
   client = null
 
   beforeEach ->
-    client = new Es(index: TEST_INDEX)
+    client = new Es index: TEST_INDEX
 
-  it 'should create client', () ->
+  it 'should create client', ->
     assert.equal 'object', typeof client
 
   it 'should accept index & type', ->
@@ -31,30 +31,22 @@ describe 'Elastics', ->
       flow.exec(
         -> client.delete {}, @
         -> client.post {}, @
-        (err, data) ->
-          throw err if err
-          done()
+        done
       )
 
     it 'should read index', (done) ->
       flow.exec(
         -> client.delete {}, @
         -> client.post {}, @
-        -> client.get path: '_mapping',
-          @
-        (err, data) ->
-          throw err if err
-          done()
+        -> client.get { path: '_mapping' }, @
+        done
       )
 
   it 'should put mapping', (done) ->
     flow.exec(
       -> client.post {}, @
-      -> client.setType(TEST_TYPE).putMapping data: MAPPING,
-        @
-      (err, data) ->
-        throw err if err
-        done()
+      -> client.setType(TEST_TYPE).putMapping { data: MAPPING }, @
+      done
     )
 
   describe 'should work with items:', ->
@@ -66,53 +58,41 @@ describe 'Elastics', ->
       flow.exec(
         #-> client.setIndex(TEST_INDEX).delete @
         #-> client.post @
-        -> client.delete {}, @
-        -> client.putMapping data: MAPPING,
-          @
-        -> done()
+        -> client.delete      {}, @
+        -> client.putMapping  { data: MAPPING }, @
+        done
       )
 
-    it 'index', (done) ->
+    it 'indexes', (done) ->
       flow.exec(
-        -> client.index data: item1,
-          @
+        -> client.index { data: item1 }, @
+        (err, data) -> client.get { id: data._id }, @
+        (err, data) -> done null, assert.deepEqual data._source, item1
+      ).error done
+
+    it 'updates', (done) ->
+      flow.exec(
+        -> client.index { id: 1, data: item1 }, @
+        -> client.index { id: 1, data: item2 }, @
+        -> client.get   { id: 1 }, @
+        (err, data) -> done null, assert.deepEqual data._source, item2
+      ).error done
+
+    it 'deletes', (done) ->
+      flow.exec(
+        -> client.index { id: 2, data: item1 }, @
+        -> client.delete { id: 2 }, @
         (err, data) ->
-          throw err if err
-          client.get id: data._id,
-            @
+          assert.equal err, null
+          client.get { id: 2 }, @
         (err, data) ->
-          throw err if err
-          assert.deepEqual data._source, item1
+          assert.notEqual err, null
           done()
       )
 
-    it 'update', (done) ->
+    it 'sets & gets by id', (done) ->
       flow.exec(
-        -> client.index id: 1, data: item1,
-          @
-        -> client.index id: 1, data: item2,
-          @
-        (err, data) ->
-          throw err if err
-          client.get id: 1,
-            @
-        (err, data) ->
-          throw err if err
-          assert.deepEqual data._source, item2
-          done()
-      )
-
-    it 'delete', (done) ->
-      flow.exec(
-        -> client.index id: 2, data: item1,
-          @
-        -> client.delete id: 2,
-          @
-        (err, data) ->
-          throw err if err
-          client.get id: 2,
-            @
-        (err, data) ->
-          assert.notEqual null, err
-          done()
-      )
+        -> client.set 3, item1, @
+        -> client.get 3, @
+        (err, data) -> done null, assert.deepEqual data._source, item1
+      ).error done

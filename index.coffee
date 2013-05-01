@@ -75,3 +75,14 @@ module.exports = class Elastics
       @prototype[method.toLowerCase()] = (params, callback) ->
         params.method = method
         @request params, callback
+
+  set: (id, data, callback) ->
+    @put
+      id:   id
+      data: data
+      callback
+
+  get: (params, callback) ->
+    params = id: params unless typeof params == 'object'
+    params.method = 'GET'
+    @request params, callback
