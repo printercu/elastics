@@ -1,2 +1,4 @@
--C --compilers coffee:coffee-script --timeout 5000
-
+--colors
+--compilers coffee:coffee-script
+--check-leaks
+--timeout 5000

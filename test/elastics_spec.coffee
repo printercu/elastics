@@ -13,10 +13,10 @@ describe 'Elastics', ->
   beforeEach ->
     client = new Es index: TEST_INDEX
 
-  it 'should create client', ->
+  it 'creates client', ->
     assert.equal 'object', typeof client
 
-  it 'should accept index & type', ->
+  it 'accepts index & type', ->
     client.setIndex()
     assert.deepEqual [null, null], [client.defaults.index, client.defaults.type]
     client.setIndex('index', 'type')
@@ -26,30 +26,29 @@ describe 'Elastics', ->
     client.setType('type2')
     assert.deepEqual ['index2', 'type2'], [client.defaults.index, client.defaults.type]
 
-  describe 'indices & types', ->
-    it 'should create index', (done) ->
-      flow.exec(
-        -> client.delete {}, @
-        -> client.post {}, @
-        done
-      )
+  it 'creates index', (done) ->
+    flow.exec(
+      -> client.delete {}, @
+      -> client.post {}, @
+      done
+    )
 
-    it 'should read index', (done) ->
-      flow.exec(
-        -> client.delete {}, @
-        -> client.post {}, @
-        -> client.get { path: '_mapping' }, @
-        done
-      )
+  it 'reads index', (done) ->
+    flow.exec(
+      -> client.delete {}, @
+      -> client.post {}, @
+      -> client.get { path: '_mapping' }, @
+      done
+    )
 
-  it 'should put mapping', (done) ->
+  it 'puts mapping', (done) ->
     flow.exec(
       -> client.post {}, @
       -> client.setType(TEST_TYPE).putMapping { data: MAPPING }, @
       done
     )
 
-  describe 'should work with items:', ->
+  describe 'works with items:', ->
     item1 = val: 'item1', tag: 'tag'
     item2 = val: 'item2', tag: 'tag'
 
@@ -63,14 +62,14 @@ describe 'Elastics', ->
         done
       )
 
-    it 'indexes', (done) ->
+    it 'index', (done) ->
       flow.exec(
         -> client.index { data: item1 }, @
         (err, data) -> client.get { id: data._id }, @
         (err, data) -> done null, assert.deepEqual data._source, item1
       ).error done
 
-    it 'updates', (done) ->
+    it 'update', (done) ->
       flow.exec(
         -> client.index { id: 1, data: item1 }, @
         -> client.index { id: 1, data: item2 }, @
@@ -78,7 +77,7 @@ describe 'Elastics', ->
         (err, data) -> done null, assert.deepEqual data._source, item2
       ).error done
 
-    it 'deletes', (done) ->
+    it 'delete', (done) ->
       flow.exec(
         -> client.index { id: 2, data: item1 }, @
         -> client.delete { id: 2 }, @
@@ -90,7 +89,7 @@ describe 'Elastics', ->
           done()
       )
 
-    it 'sets & gets by id', (done) ->
+    it 'set & get by id', (done) ->
       flow.exec(
         -> client.set 3, item1, @
         -> client.get 3, @
