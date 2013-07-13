@@ -1,8 +1,34 @@
 http  = require 'http'
 url   = require 'url'
 qs    = require 'querystring'
+util  = require 'util'
 
 module.exports = class Elastics
+  @normalizeFilters: (filters) ->
+    return filters unless util.isArray filters
+    if 1 < filters.length
+      and: filters: filters
+    else
+      filters[0]
+
+  @normalizeQuery: (query, filters) ->
+    filter = @normalizeFilters filters
+
+    query ||= match_all: {}
+    if filter
+      filtered:
+        query:  query
+        filter: filter
+     else
+      query
+
+  @termsQuery: (field, val) ->
+    query = if util.isArray val then 'terms' else 'term'
+    result = {}
+    result[query] = {}
+    result[query][field] = val
+    result
+
   constructor: (@defaults = {}) ->
     @defaults.host ||= 'localhost'
     @defaults.port ||= 9200
