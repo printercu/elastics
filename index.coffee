@@ -61,6 +61,7 @@ module.exports = class Elastics
       method:   params.method || 'GET'
       path:     @generatePath params
       headers:  'Content-Type': 'application/json'
+      agent:    @defaults.agent
       (res) ->
         res_data = ''
         res.on 'data', (chunk) ->
