@@ -13,7 +13,6 @@ module.exports = class Elastics
 
   @normalizeQuery: (query, filters) ->
     filter = @normalizeFilters filters
-
     query ||= match_all: {}
     if filter
       filtered:
@@ -83,6 +82,22 @@ module.exports = class Elastics
     req.end()
 
   # shortcuts
+  ['PUT', 'POST', 'DELETE'].forEach (method) =>
+    @::[method.toLowerCase()] = (params, callback) ->
+      params.method = method
+      @request params, callback
+
+  set: (id, data, callback) ->
+    @put
+      id:   id
+      data: data
+      callback
+
+  get: (params, callback) ->
+    params = id: params unless typeof params is 'object'
+    params.method = 'GET'
+    @request params, callback
+
   putMapping: (params, callback) ->
     params.path = '_mapping'
     @put params, callback
@@ -96,20 +111,3 @@ module.exports = class Elastics
       @put params, callback
     else
       @post params, callback
-
-  for method in ['GET', 'PUT', 'POST', 'DELETE']
-    do (method) =>
-      @prototype[method.toLowerCase()] = (params, callback) ->
-        params.method = method
-        @request params, callback
-
-  set: (id, data, callback) ->
-    @put
-      id:   id
-      data: data
-      callback
-
-  get: (params, callback) ->
-    params = id: params unless typeof params == 'object'
-    params.method = 'GET'
-    @request params, callback
