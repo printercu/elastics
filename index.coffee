@@ -21,11 +21,14 @@ module.exports = class Elastics
      else
       query
 
-  @termsQuery: (field, val) ->
-    query = if util.isArray val then 'terms' else 'term'
-    result = {}
-    result[query] = {}
-    result[query][field] = val
+  @termsQuery: (field, val, options = {}) ->
+    if util.isArray val
+      result = terms: {}
+      result.terms[field] = val
+      result.terms.execution = options.execution if options.execution
+    else
+      result = term: {}
+      result.term[field] = val
     result
 
   constructor: (@defaults = {}) ->
