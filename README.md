@@ -67,8 +67,8 @@ es.setIndex 'other_index', 'type'
 mapping = type:
   fields:
     field_one: type: 'string'
-es.putMapping {data: mapping}
-# PUT http://host::port/other_index/type
+es.putMapping data: mapping
+# PUT http://host::port/other_index/type/_mapping
 # body is json of mapping
 
 es.get index: 'one', type: 'two', id: 'three'
