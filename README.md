@@ -8,6 +8,9 @@ Be careful while using settings for default type & index: they are client's
 instance variables. So if you are going to have one client in an application
 you'd better set them explicitly in each call. JS is so _asynchronous..._
 
+_Looking for easy indices and mappings management with zero-downtime migrations?
+Check out [ruby version](https://github.com/printercu/elastics-rb)._
+
 ## usage
 
 ```coffee
